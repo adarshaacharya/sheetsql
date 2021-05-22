@@ -22,7 +22,8 @@ export interface IStorageOptions {
 
   // google spreadsheet settings
   apiKey?: string
-  keyFile?: string
+  clientEmail?: string
+  privateKey?: string
 
   // storage settings
   cacheTimeoutMs?: number // ms
@@ -39,7 +40,7 @@ export default class GoogleStorage implements IStorage {
   private cacheTimeoutMs: number
 
   constructor(opts: IStorageOptions) {
-    if (!opts.apiKey && !opts.keyFile) {
+    if (!opts.apiKey && !opts.clientEmail && !opts.privateKey) {
       throw new Errors.StorageOptionsError()
     }
 
@@ -47,7 +48,10 @@ export default class GoogleStorage implements IStorage {
       ? opts.apiKey
       : new google.auth.GoogleAuth({
           scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-          keyFile: opts.keyFile,
+          credentials: {
+            client_email: opts.clientEmail,
+            private_key: opts.privateKey,
+          },
         })
     this.sheets = google.sheets({
       version: 'v4',
